@@ -1,0 +1,18 @@
+{% extends 'quiz/base.html' %}
+{% block content %}
+<div class ="container">
+<form method="POST">
+    <div class="form-group">
+    {% csrf_token %}
+    <table class="table">
+    {{form}}
+    </table>
+    </div>
+    <button type="submit" class="btn btn-primary">login</button>
+</form>
+<br>
+<a href="{% url 'signup' %}"><button type="submit" class="btn btn-primary">Register </button></a>
+
+
+</div>
+{% endblock %}

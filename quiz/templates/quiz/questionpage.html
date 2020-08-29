@@ -1,0 +1,28 @@
+{% extends 'quiz/base.html' %}
+{% block content %}
+ <!-- <form method="POST" action=""></form> -->
+ <div class="container">
+ <h5>{{question.question}}</h5>
+ {% for a in answer %}
+ <div class="form-check">
+ <input class="form-check-input" type="radio" name="{{list1_item.id}}" id="{{a.id}}" value="{{a.id}}" required>
+
+ <label class="form-check-label" for="{{a.id}}">
+  {{ a.answer}}
+ </label>
+</div>
+
+ {% endfor %}
+ <br>
+ <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+<br>
+<div class="text-center">
+  <a href="{% url 'questions' question.category.id %}">
+      <button type="button" style="text-align: center;" class="btn btn-dark">
+          Next Question
+      </button></a>
+</div>
+</div>
+
+{% endblock %}

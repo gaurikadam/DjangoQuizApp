@@ -1,0 +1,14 @@
+{% extends 'quiz/base.html' %}
+{% block content %}
+
+<h1> Welcome {{user}} </h1>
+<div class="container">
+    {% for c in cat.all %}
+    <table class="table">
+        <!-- <tr>{{c.id}}</tr> -->
+        <!-- <td>{{ c.id}}</td> -->
+        <td><a href="{% url 'questions' c.id %}">{{ c.title}}</a></td>
+     </table>
+     {% endfor %}
+</div>
+{% endblock %}
