@@ -1,0 +1,29 @@
+{% extends 'quiz/base.html' %}
+{% block title %}Results{% endblock %}
+{% block content %}
+
+
+<div class="container">
+    
+    <table class="table">
+   
+        {% if result.correctness == True %}
+        <tr>
+        <th scope="row">Result</th>
+        <td class="bg-success">Correct</td>
+    </tr>
+        {% else %}
+        <tr>
+        <th scope="row">Result</th>
+        <td class="bg-danger">Wrong</td>
+    </tr>
+        {% endif %}
+     </table>
+     <div class="text-center">
+        <a href="{% url 'questions' result.question.category.id %}">
+            <button type="button" style="text-align: center;" class="btn btn-dark">
+                Next Question
+            </button></a>
+    </div>
+</div>
+{% endblock %}
