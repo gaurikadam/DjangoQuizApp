@@ -1,13 +1,24 @@
 {% extends 'quiz/base.html' %}
+{% block title %}Home{% endblock %}
 {% block content %}
 
-<h1> Welcome {{user}} </h1>
+<center><h1> Welcome {{user}} </h1></center>
 <div class="container">
     {% for c in cat.all %}
     <table class="table">
         <!-- <tr>{{c.id}}</tr> -->
         <!-- <td>{{ c.id}}</td> -->
-        <td><a href="{% url 'questions' c.id %}">{{ c.title}}</a></td>
+        <tr><td><a href="{% url 'questions' c.id %}">{{ c.title}}</a></td>
+           <td align="right">
+                {% for key,value in dict.items %}
+                {% if key == c.id%}
+                Total Marks = {{value.0}}/{{value.1}}
+                {% endif %}
+                {% endfor %}
+            </td>
+        </tr>
+        
+
      </table>
      {% endfor %}
 </div>
