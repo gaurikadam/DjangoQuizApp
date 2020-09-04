@@ -10,10 +10,26 @@ urlpatterns = [
     path('', IndexView.as_view(), name='index'),
     path('signup/',SignUpView.as_view(), name='signup'),
     path('questions/<slug:pk>/',QuizView.as_view(),name='questions'),
-    path('result',ResultView.as_view(),name='result')
-    
-
+    path('result',ResultView.as_view(),name='result'),
+    # path('account/password_change/', auth_views.LoginView.as_view(template_name='registration/passwordchange.html')),
+    path('change-password/',auth_views.PasswordChangeView.as_view(template_name='registration/passwordchange.html',
+    success_url = '/quiz/'
+        ),
+        name='change_password'
+    ),
+    # path(
+    #     'change_password_done/',
+    #     auth_views.PasswordChangeView.as_view(
+    #         template_name='registration/passwordchdone.html',
+    #         # success_url = '/quiz/'
+    #     ),
+    #     name='change_password_done'
+    # ),
+    # path('account/password_change/done/', auth_views.LoginView.as_view(
+    # template_name='registration/passwordchdone.html')),
+ 
 ]
+
     #url for funtion based views
     # path('',views.index, name='index'),
     # path('signup/',views.signup, name='signup'),
