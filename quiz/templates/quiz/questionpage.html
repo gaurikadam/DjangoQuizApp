@@ -15,12 +15,13 @@
       </a></center>
     
     {% else %}
-    <form method="POST" action="{% url 'result' %}">
+    <form method="POST" id="idForm" action= "{% url 'result' %}">
         {% csrf_token %}
-        <h5>Q - {{ question.question }}</h5>
+        <h5 id="quesid"value="{{question.id}}">Q - {{ question.question }}</h5>
         {% for a in answer.all %}
         <div class="form-check">
-        <input class="form-check-input" type="radio" name="{{ question.id }}" id="{{a.id}}" value="{{a.id}}" required>
+          
+        <input class="form-check-input" type="radio" name="ans" id="ansid" value="{{a.id}}"  required>
         <label class="form-check-label" for="{{a.id}}">
           {{ a.answer }}
         </label>
@@ -28,8 +29,52 @@
         {% endfor %}
         <hr>
       <br>
-      <button type="submit" class="btn btn-dark">Submit</button>
+      <button type="submit" id="resbtn" class="btn btn-dark">Submit</button>
     </form>
+    <br>
+    <table class="table">
+
+    </table>
     {% endif %}
+    {% block javascript %}
+  <script>
+   $("#idForm").submit(function(e) {
+
+        // e.preventDefault(); // avoid to execute the actual submit of the form.
+
+        var form = $(this);
+        console.log($('#quesid').val());
+        console.log($('#ansid').val());
+        if (document.getElementById('ansid').checked) {
+  var rate_value = document.getElementById().value;
+        }
+        console.log(document.getElementsByName('ansid').value);
+        
+
+    //     $.ajax({
+    //     type:'POST',
+    //     url:'{% url "result" %}',
+    //     data:{
+    //         question:$('#quesid').val(),
+    //         answer:$('#ansid').val(),
+    //         csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+    //         action: 'post'
+    //     },
+    //     success:function(json){
+    //         console.log(json)
+    //     },
+     
+    // });
+
+// });
+//     $(document).on('submit', '#post-form',function(e){
+//       console.log($('#quesid').val());
+//       console.log($('#ansid').val());
+   
+});
+  </script>
+{% endblock %}
+    
+   
 </div>
 {% endblock %}

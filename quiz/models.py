@@ -1,5 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.dispatch import receiver
+from rest_framework.authtoken.models import Token
+from django.db.models.signals import post_save
 # Create your models here.
 import uuid 
 
@@ -14,6 +17,12 @@ class Category(models.Model):
     def __str__(self):
         model_category = str(self.title)
         return model_category
+
+class Profile(models.Model):
+    
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    email_confirmed = models.BooleanField(default=False)
+
 
 
 class Question(models.Model):
@@ -65,3 +74,15 @@ class Result(models.Model):
     def __str__(self):
         model_result = '{} | {}'.format(str(self.user),str(self.question)) or '{} | {}'.format('','')
         return model_result
+
+
+@receiver(post_save, sender=User)
+def update_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+        instance.profile.save()
+
+@receiver(post_save, sender = User)
+def create_auth_token(sender,instance = None, created= False,**kwargs):
+    if created:
+        Token.objects.create(user=instance)

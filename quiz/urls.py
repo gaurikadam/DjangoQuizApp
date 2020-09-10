@@ -2,7 +2,7 @@ from django.urls import path,URLPattern
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
 # from . import views
-from .views import IndexView,SignUpView,QuizView,ResultView
+from .views import IndexView,SignUpView,QuizView,ResultView,ActivateAccount
 
 urlpatterns = [
     # ex: /polls/
@@ -17,6 +17,7 @@ urlpatterns = [
         ),
         name='change_password'
     ),
+    path('activate/<uidb64>/<token>/', ActivateAccount.as_view(), name='activate'),
     # path(
     #     'change_password_done/',
     #     auth_views.PasswordChangeView.as_view(
