@@ -1,0 +1,52 @@
+{% extends 'quiz/base.html' %}
+{% block title %}Quiz{% endblock %}
+{% block content %}
+
+<div class="container">
+    <br>
+    {% if complete %}
+    <center><h3>All from questions from the category category are completed</h3></center>
+    <br>
+    
+      <center><a href="{% url 'index' %}">
+        <button type="button" style="text-align: center;" class="btn btn-primary">
+          Choose Catergory 
+        </button>
+      </a></center>
+      <br>
+        <center><a href="{% url 'result' Current_category_id %}">
+        <button type="button" style="text-align: center;" class="btn btn-primary">
+          View Results
+        </button>
+        <br>
+      </a></center>
+    
+    {% else %}
+    <form method="POST" id="idForm" action="">
+        {% csrf_token %}
+        <h5 id="quesid"value="{{question.id}}">Q - {{ question.question }}</h5>
+        {% for a in answer.all %}
+        <div class="form-check">
+          
+        <input class="form-check-input" type="radio" name="{{ question.id }}" id="ansid" value="{{a.id}}"  required>
+        <label class="form-check-label" for="{{a.id}}">
+          {{ a.answer }}
+        </label>
+      </div>
+        {% endfor %}
+        <hr>
+      <br>
+      <button type="submit" id="resbtn" class="btn btn-dark">Submit</button>
+    </form>
+    <br>
+    <table class="table">
+
+    </table>
+    {% endif %}
+    {% block javascript %}
+  
+{% endblock %}
+    
+   
+</div>
+{% endblock %}

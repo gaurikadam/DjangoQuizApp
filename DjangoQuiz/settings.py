@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'quizapi',
     'rest_framework',
     'rest_framework.authtoken',
+
     
 ]
 
@@ -141,10 +142,10 @@ LOGIN_REDIRECT_URL = '/'
 
 LOGOUT_REDIRECT_URL = '/'
 
-EMAIL_USE_TLS = True
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'gauribkadam@gmail.com'
-EMAIL_HOST_PASSWORD = 'Gaurikadam983'
-EMAIL_PORT = 587
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# EMAIL_USE_TLS = True
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_HOST_USER = 'gauribkadam@gmail.com'
+# EMAIL_HOST_PASSWORD = 'Gaurikadam983'
+# EMAIL_PORT = 587
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' 
 # LOGIN_URL = 'qui

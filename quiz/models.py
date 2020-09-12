@@ -21,7 +21,7 @@ class Category(models.Model):
 class Profile(models.Model):
     
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    email_confirmed = models.BooleanField(default=False)
+    is_email_confirmed = models.BooleanField(default=False)
 
 
 
@@ -40,7 +40,7 @@ class Answer(models.Model):
     id = models.AutoField(primary_key=True,editable=False)
     question = models.ForeignKey(Question,on_delete=models.CASCADE)
     answer = models.CharField(max_length=200)
-    correct = models.BooleanField(default=False)
+    is_correct = models.BooleanField(default=False)
 
     def __str__(self):
         model_answers = str(self.answer) or ''
@@ -67,8 +67,11 @@ class Result(models.Model):
         verbose_name_plural = 'Results'
     id = models.AutoField(primary_key=True,editable=False)
     user = models.ForeignKey(User,on_delete=models.CASCADE)
+    # category = models.ForeignKey(Category,on_delete=models.CASCADE,default=1)
     question = models.ForeignKey(Question,on_delete=models.CASCADE)
-    correctness = models.BooleanField(default=False)
+    # correct_answer = models.ForeignKey(Answer, on_delete=models.CASCADE,default="",related_name='+')
+    # selected_answer  = models.ForeignKey(Answer, on_delete=models.CASCADE,default="",related_name='+')
+    is_correct = models.BooleanField(default=False)
     
 
     def __str__(self):

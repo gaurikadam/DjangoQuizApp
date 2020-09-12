@@ -10,25 +10,17 @@ urlpatterns = [
     path('', IndexView.as_view(), name='index'),
     path('signup/',SignUpView.as_view(), name='signup'),
     path('questions/<slug:pk>/',QuizView.as_view(),name='questions'),
-    path('result',ResultView.as_view(),name='result'),
-    # path('account/password_change/', auth_views.LoginView.as_view(template_name='registration/passwordchange.html')),
-    path('change-password/',auth_views.PasswordChangeView.as_view(template_name='registration/passwordchange.html',
-    success_url = '/quiz/'
-        ),
-        name='change_password'
-    ),
+    path('result/<slug:pk>/',ResultView.as_view(),name='result'),
+    path('account/password_change/done/', auth_views.PasswordChangeDoneView.as_view(template_name='registration/password-change-done.html')),
+    path('change-password/',auth_views.PasswordChangeView.as_view(template_name='registration/password-change.html',success_url = '/account/password_change/done/'), name='change_password'),
     path('activate/<uidb64>/<token>/', ActivateAccount.as_view(), name='activate'),
-    # path(
-    #     'change_password_done/',
-    #     auth_views.PasswordChangeView.as_view(
-    #         template_name='registration/passwordchdone.html',
-    #         # success_url = '/quiz/'
-    #     ),
-    #     name='change_password_done'
-    # ),
-    # path('account/password_change/done/', auth_views.LoginView.as_view(
-    # template_name='registration/passwordchdone.html')),
- 
+    #reset
+    path('password-reset/',auth_views.PasswordResetView.as_view(template_name='registration/password-reset.html'), name='password-reset'),
+    # path('password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
+    path('account/password_reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='registration/password-reset-done.html'), name='password-reset-done'),
+    path('account/confirm/',auth_views.PasswordResetConfirmView.as_view(template_name='registration/password-reset-token.html'), name='password-reset-confirm'),
+    path('password-reset-complete/', auth_views.PasswordResetCompleteView.as_view(template_name='registration/password-reset-complete.html'), name='password-reset-complete'),
+
 ]
 
     #url for funtion based views

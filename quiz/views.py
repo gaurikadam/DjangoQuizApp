@@ -30,12 +30,13 @@ from django.core.mail import EmailMultiAlternatives
 
 from django.template.loader import get_template 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__) #<<<<<<<<<<<<<<<<<<<<
+logger = logging.getLogger(__name__) 
 
-# @method_decorator(login_required, name='dispatch')
+
 class IndexView(LoginRequiredMixin,View):
      login_url = '/account/login/'
-     
+     template_name = 'quiz/index.html'
+
      def get(self,request):
 
           # Loads category and total marks scored
@@ -53,7 +54,7 @@ class IndexView(LoginRequiredMixin,View):
 
                
           else:          
-               return render(request, 'quiz/index.html',{'cat':category_object}) 
+               return render(request,self.template_name,{'cat':category_object}) 
 
 
 class ActivateAccount(View):
@@ -69,8 +70,7 @@ class ActivateAccount(View):
             user.is_active = True
             user.profile.email_confirmed = True
             user.save()
-            login(request, user)
-            
+            login(request, user) 
             messages.success(request, ('Your account have been confirmed.'))
 
             return redirect('/account/login/')
@@ -78,7 +78,7 @@ class ActivateAccount(View):
             messages.warning(request, ('The confirmation link was invalid, possibly because it has already been used.'))
             return redirect('/')
 
-# @method_decorator(login_required, name='dispatch')    
+
 class SignUpView(View):
      # login_url = '/account/login/'
    
@@ -97,7 +97,6 @@ class SignUpView(View):
                user = form.save()
                user.is_active = False # Deactivate account till it is confirmed
                user.save()
-
                current_site = get_current_site(request)
                subject = 'Activate Your MySite Account'
                message = render_to_string('registration/account_active_mail.html', {
@@ -107,34 +106,21 @@ class SignUpView(View):
                 'token': account_activation_token.make_token(user),
                 })
                user.email_user(subject, message)
-               logging.info(message)
-
+               logger.info(message)
                messages.success(request, ('Please Confirm your email to complete registration.'))
                logger.info('check link in console')
-               # to_email = form.cleaned_data.get('email')
-               # username = form.cleaned_data.get('username')
-               # print(to_email)
-               # print(username)
-               # # d = { 'username': username } 
-               # subject, from_email, to = 'welcome', 'gauribkadam@gmail.com', to_email 
-               # html_content = "hi this is re"
-               # msg = EmailMultiAlternatives(subject, html_content, from_email, [to]) 
-               # msg.send()         
+                       
                return redirect('/account/login/')
 
           return render(request,self.template_name,{'form':form})
 
 
-# @method_decorator(login_required, name='dispatch')
 class QuizView(LoginRequiredMixin,View):
      login_url = '/account/login/'
+     template_name = 'quiz/question_submit_form.html'
      
-
      def get(self,request,*args, **kwargs):
           pk = self.kwargs.get('pk')
-          
-     #   Question.objects.filter(category_id=pk).exclude(results__user__in=user)
-     # Question.objects.filter(category_id=pk).exclude(results__user__in=user).order_by('id')[0]
           user = request.user
           
           category_objects = get_object_or_404(Category,pk =pk)
@@ -149,10 +135,52 @@ class QuizView(LoginRequiredMixin,View):
                except Result.DoesNotExist:
 
                     answers = Answer.objects.filter(question=question)
-                    return render(request,'quiz/questionpage.html',{'answer':answers,'question':question})
+                    return render(request,'quiz/question_submit_form.html',{'answer':answers,'question':question})
 
-          return render(request,'quiz/questionpage.html',{'complete':True})
+          return render(request,self.template_name,{'complete':True,'Current_category_id':pk})          
+     
+    
+     def post(self, request, *args, **kwargs):
+          pk = self.kwargs.get('pk')
+          user = request.user
+          post_data_list = list(request.POST.items())
+          user = request.user
+          question_in_request = post_data_list[1][0]
+          selected_answer_in_request=post_data_list[1][1]
+          question = get_object_or_404(Question,id=question_in_request)
+          selected_answer = get_object_or_404(Answer,id=selected_answer_in_request)
+          select_answer_in_form =selected_answer.answer
+          correct_answer_id = ''
+          answers = Answer.objects.filter(question=question)
+          true_answer = ''
+          answer = answers.filter(is_correct=True)
+          for ans in answer.all():
+               true_answer =ans.answer
+          correct_answer_id = ans.id
+          if str(correct_answer_id) == str(post_data_list[1][1]):
+               result = Result.objects.create(user=user,
+                                        question=question,
+                                        # correct_answer=true_answer,
+                                        # selected_answer=select_answer_in_form,
+                                    is_correct=True)
+               add_to_progress(request,question,True)
+               current_category_id =  str(result.question.category.id)
+               next_question_url= "/questions/" + current_category_id
+               return redirect(next_question_url)
+   
+          else:
+               result = Result.objects.create(user=user,
+                                        question=question,
+                                        # correct_answer=true_answer,
+                                        # selected_answer=select_answer_in_form,
+                                        is_correct=False)
+               add_to_progress(request,question,False)
+               current_category_id =  str(result.question.category.id)
+               next_question_url= "/questions/" + current_category_id
+               return redirect(next_question_url)
 
+     
+     
      
 def add_to_progress(request,question,correctness):
 
@@ -168,7 +196,6 @@ def add_to_progress(request,question,correctness):
 
     else:
           progress = Progress.objects.filter(user=user,category=category)
-          print(progress)
           progress.marks += increase_mark
           progress.save()
           
@@ -176,71 +203,13 @@ def add_to_progress(request,question,correctness):
 # @method_decorator(login_required, name='dispatch')
 class ResultView(LoginRequiredMixin,View):
      login_url = '/account/login/'
+     template_name = 'quiz/result.html'
      
-
-     def post(self, request, *args, **kwargs):
-          
+     def get(self,request,*args, **kwargs):
+          pk = self.kwargs.get('pk')
           user = request.user
-          logger.info(user)
-          
-          # ans = request.POST.get('name', None)
-          # que = request.POST.get('name', None)
-          # if request.POST.get('action') == 'post':
-          #      question_in_request = request.POST.get('title')
-          #      print(question_in_request)
-          #      selected_answer_in_request = request.POST.get('description')
-          #      print(selected_answer_in_request)
-
-
-          post_data_list = list(request.POST.items())
-          user = request.user
-          question_in_request = post_data_list[1][0]
-     
-          logger.info(question_in_request)
-          selected_answer_in_request=post_data_list[1][1]
-          
-          logger.info(selected_answer_in_request)
-     
-          question = get_object_or_404(Question,id=question_in_request)
-          selected_answer = get_object_or_404(Answer,id=selected_answer_in_request)
-          correct_answer_id = ''
-          answers = Answer.objects.filter(question=question)
-          for ans in answers.all():
-               
-               if ans.correct == True:
-                    logger.info(ans)
-                    correct_answer_id = ans.id
-          correct_answer = get_object_or_404(Answer,id=correct_answer_id)
-        
-          if str(correct_answer_id) == str(post_data_list[1][1]):
-               result = Result.objects.create(user=user,
-                                        question=question,
-                                        correctness=True)
-               add_to_progress(request,question,True)
-               result_data = {'correct':result.correctness,'cat_id': result.question.category.id}
-               data = {
-               'result_data': result_data
-                      }
-               return JsonResponse(data)
-               # return render(request,'quiz/result.html',{'result':result})
-               logger.info(result.question.category.id)
-               # return HttpResponse(json.dumps())
-          else:
-               result = Result.objects.create(user=user,
-
-                                        question=question,
-                                        correctness=False)
-               add_to_progress(request,question,False)
-               # return HttpResponse(json.dumps(result))
-               print(result.question.category.id)
-               # return render(request,'quiz/result.html',{'result':result})
-               result_data = {'correct':result.correctness,'cat_id': result.question.category.id}
-               data = {
-               'result_data': result_data
-                      }
-               return JsonResponse(data)
-            
-          return render(request,'quiz/result.html')
+          questions = Result.objects.filter(user=user,question__category__id = pk)
+          return render(request,self.template_name,{'Question':questions})
 
   
 
@@ -248,126 +217,4 @@ class ResultView(LoginRequiredMixin,View):
 
 
 
-# #      # code for Function based views
-
-# @login_required(login_url='/account/login/')
-# def index(request):
-
-#      # Loads category and total marks scored
-#      category_object = Category.objects.order_by('id')
-#      user = request.user
-#      progress = Progress.objects.filter(user=user)
-     
-#      score_dict = {}
-#      if progress is not None:
-#           for p in progress:
-          
-#                quiz_category_id = p.category.id
-#                score_dict[quiz_category_id] = [p.marks,p.total]
-#           return render(request, 'quiz/index.html',{'cat':category_object,'dict':score_dict}) 
-
-          
-#      else:          
-#           return render(request, 'quiz/index.html',{'cat':category_object}) 
-
-     
-
-# def signup(request):
-     
-#      # Creates a user
-#      if request.method == "POST":
-#           form = SignUpForm(request.POST)
-#           if form.is_valid():
-#                form.save()
-#                to_email = form.cleaned_data.get('email')
-#                username = form.cleaned_data.get('username')
-#                print(to_email)
-#                print(username)
-#                d = { 'username': username } 
-#                subject, from_email, to = 'welcome', 'gauribkadam@gmail.com', to_email 
-#                html_content = "hi this is re"
-#                msg = EmailMultiAlternatives(subject, html_content, from_email, [to]) 
-#                msg.send()
-#           return redirect('/account/login/')
-#      else:
-#           form = SignUpForm()
-
-#      return render(request,'registration/sign_up.html',{"form":form})
-  
-
-# @login_required(login_url='/account/login/')     
-# def quiz(request,cat_id):
-    
-#      # Loading the questions on page
-#      user = request.user
-#      category_object = get_object_or_404(Category,pk = cat_id)
-#      questions = Question.objects.filter(category = category_object)
-#      answers = Answer.objects.filter(question__in=questions)
-#      for question in questions.all():
-#           try:
-#                question_in_result = Result.objects.get(user=user,question=question)
-#                continue
-#           except Result.DoesNotExist:
-#                answers = Answer.objects.filter(question=question)
-#                return render(request,'quiz/questionpage.html',{'answer':answers,'question':question})
-
-#      return render(request,'quiz/questionpage.html',{'complete':True})
-     
-# def add_to_progress(request,question,correctness):
-# #     Adding to the progress
-#     user = request.user
-#     category = question.category
-#     increase_mark = 0
-#     total_questions = Question.objects.filter(category=category).count()
-#     if correctness:
-#           increase_mark = 1
-     
-#     if Progress.DoesNotExist:
-#           progress = Progress.objects.create(user=user,category=category,marks=increase_mark,total=total_questions)
-
-#     else:
-#           progress = Progress.objects.filter(user=user,category=category)
-#           print(progress)
-#           progress.marks += increase_mark
-#           progress.save()
-
-
-
-# @login_required(login_url='/account/login/')     
-# def result(request):  
-      
-#      # Final results 
-#      if request.method == 'POST':
-#           post_data_list = list(request.POST.items())
-#           user = request.user
-#           question_in_request = post_data_list[1][0]
-#           print(question_in_request)
-#           selected_answer_in_request=post_data_list[1][1]
-#           print(selected_answer_in_request)
-#           question = get_object_or_404(Question,id=question_in_request)
-#           selected_answer = get_object_or_404(Answer,id=selected_answer_in_request)
-#           correct_answer_id = ''
-#           answers = Answer.objects.filter(question=question)
-#           for ans in answers.all():
-               
-#                if ans.correct == True:
-#                     print(ans)
-#                     correct_answer_id = ans.id
-#           correct_answer = get_object_or_404(Answer,id=correct_answer_id)
-        
-#           if str(correct_answer_id) == str(post_data_list[1][1]):
-#                result = Result.objects.create(user=user,
-#                                         question=question,
-#                                         correctness=True)
-#                add_to_progress(request,question,True)
-
-#                return render(request,'quiz/result.html',{'result':result})
-#           else:
-#                result = Result.objects.create(user=user,
-#                                         question=question,
-#                                         correctness=False)
-#                add_to_progress(request,question,False)
-#                return render(request,'quiz/result.html',{'result':result})
-            
-#      return render(request,'quiz/result.html')
 

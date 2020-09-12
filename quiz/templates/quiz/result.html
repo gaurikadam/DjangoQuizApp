@@ -4,26 +4,33 @@
 
 
 <div class="container">
-    
-    <table class="table">
-   
-        {% if result.correctness == True %}
-        <tr>
-        <th scope="row">Result</th>
-        <td class="bg-success">Correct</td>
-    </tr>
-        {% else %}
-        <tr>
-        <th scope="row">Result</th>
-        <td class="bg-danger">Wrong</td>
-    </tr>
-        {% endif %}
-     </table>
-     <div class="text-center">
-        <a href="{% url 'questions' result.question.category.id %}">
-            <button type="button" style="text-align: center;" class="btn btn-dark">
-                Next Question
-            </button></a>
-    </div>
+
+        <h3>Results</h3>
+        <table class="table">
+            <thead class="thead-dark">
+               
+              <tr>
+                <th scope="col">Question</th>
+                <th scope="col">Result</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for question in Question %}
+                {% if question.is_correct == True %}
+              <tr>
+                <th scope="row">{{question.question}}</th>
+                <td class="bg-success">Correct</td>
+              </tr>
+                {% else %}
+                <tr>
+                    <th scope="row">{{question.question}}</th>
+                    <td class="bg-danger">Wrong</td>
+                  </tr>
+              <tr>
+                  {% endif %}
+             
+              {% endfor %}
+            </tbody>
+          </table> 
 </div>
 {% endblock %}
