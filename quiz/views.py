@@ -50,7 +50,7 @@ class IndexView(LoginRequiredMixin,View):
                
                     quiz_category_id = p.category.id
                     score_dict[quiz_category_id] = [p.marks,p.total]
-               return render(request, 'quiz/index.html',{'cat':category_object,'dict':score_dict}) 
+               return render(request,self.template_name,{'cat':category_object,'dict':score_dict}) 
 
                
           else:          
@@ -135,7 +135,7 @@ class QuizView(LoginRequiredMixin,View):
                except Result.DoesNotExist:
 
                     answers = Answer.objects.filter(question=question)
-                    return render(request,'quiz/question_submit_form.html',{'answer':answers,'question':question})
+                    return render(request,self.template_name,{'answer':answers,'question':question})
 
           return render(request,self.template_name,{'complete':True,'Current_category_id':pk})          
      

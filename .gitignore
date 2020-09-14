@@ -14,7 +14,6 @@ quiz/migrations/0014_auto_20200912_1626.py
 quiz/migrations/0015_auto_20200912_2050.py
 
 
-
 quiz/migrations/__pycache__/0002_delete_result.cpython-36.pyc
 quiz/migrations/__pycache__/0003_result.cpython-36.pyc
 quiz/migrations/__pycache__/0004_auto_20200825_1952.cpython-36.pyc
