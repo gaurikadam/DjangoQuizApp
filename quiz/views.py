@@ -39,7 +39,7 @@ class IndexView(LoginRequiredMixin,View):
 
      def get(self,request):
 
-          # Loads category and total marks scored
+ # Loads category and total marks scored
           category_object = Category.objects.order_by('id')
           user = request.user
           progress = Progress.objects.filter(user=user)
@@ -55,7 +55,16 @@ class IndexView(LoginRequiredMixin,View):
                
           else:          
                return render(request,self.template_name,{'cat':category_object}) 
-
+#   <!-- <tr>{{c.id}}</tr> -->
+#         <!-- <td>{{ c.id}}</td> -->
+#         <!-- <tr><td><a href="{% url 'questions' c.id %}">{{ c.title}}</a></td>
+#            <td align="right">
+            
+#                 <td>{{marks[c.id]}}</td>
+#                 <td>{{total[c.id]}}</td>
+         
+#             </td>
+#         </tr> -->
 
 class ActivateAccount(View):
 
@@ -125,7 +134,7 @@ class QuizView(LoginRequiredMixin,View):
           
           category_objects = get_object_or_404(Category,pk =pk)
           questions = Question.objects.filter(category = category_objects)
-         
+      
           for question in questions.all():
                try:
                     question_in_result = Result.objects.get(user=user,question=question)

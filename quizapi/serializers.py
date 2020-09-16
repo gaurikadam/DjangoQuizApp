@@ -34,32 +34,45 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = '__all__'
 
-class QuestionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Question
-        fields = '__all__'
 
-class Answerserializer(serializers.ModelSerializer):
-    class Meta:
-        model = Answer
-        fields = '__all__'
-
-class Progressserializer(serializers.ModelSerializer):
-    class Meta:
-        model = Progress
-        fields = '__all__'
-        
-class Ressultserializer(serializers.ModelSerializer):
-    class Meta:
-        model = Result
-        fields = '__all__'
-
-#     class Meta: user answer question progress result
-#testing api intially
 class Categoryserializer(serializers.ModelSerializer):
     class Meta:
          model = Category
          fields = ('id','title',)
+
+
+class Ressultserializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Result
+        fields = ('id','is_correct','user','question',)
+
+
+class Progressserializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    category = Categoryserializer(read_only=True)
+    class Meta:
+        model = Progress
+        fields = ('id','marks','total','user','category',)
+
+
+class QuestionSerializer(serializers.ModelSerializer):
+    
+    category = Categoryserializer(read_only=True)
+    class Meta:
+        model = Question
+        fields = '__all__'
+
+
+class Answerserializer(serializers.ModelSerializer):
+    question = QuestionSerializer(read_only=True)
+    class Meta:
+        model = Answer
+        fields = ('id','question','answer','is_correct',)
+
+
+#     class Meta: user answer question progress result
+#testing api intially
 
 
 
