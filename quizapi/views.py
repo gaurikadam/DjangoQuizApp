@@ -62,31 +62,48 @@ class CategoryAPIView(generics.ListAPIView):
     queryset = Category.objects.order_by('id')
     serializer_class = Categoryserializer
 
-class QuestionAPIView(generics.ListAPIView):
-    permission_classes = [IsAuthenticated]
-    serializer_class = QuestionSerializer
-    def get_queryset(self):
-        cat_id = self.request['cat_id']
-        user = self.request.user
-        question_in_result = Question.objects.filter(user = user,question__category__id = cat_id)
-        query = Question.objects.filter(category__id = cat_id).exclude(id__in=[o.question.id for o in question_in_result])
-        print(query)
-        return query
 
-class AnswerAPIView(generics.ListAPIView):
+    # permission_classes = [IsAuthenticated]
+    # def get(self,request,pk):
+    #     categories = Category.objects.filter(id=pk)
+    #     print(categories)
+    #     serializer = Categoryserializer(categories,many=True)
+    #     return Response(serializer.data,status=200)
+
+
+class QuestionAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = Answerserializer
-    def get_queryset(self):
-        question_id = self.kwargs['question_id']
-        query_api=  Answer.objects.filter(question__id = question_id)
-        return query_api
+    def get(self,request,pk):
+        user = request.user
+        # question_in_result = Question.objects.filter(category__id = pk)
+        # query = Question.objects.filter(category__id = pk).exclude(id__in=[o.question.id for o in question_in_result])
+        query = Question.objects.filter(category_id=pk).exclude(result__user__in=user)
+        serializer = QuestionSerializer(query)
+        return Response(serializer.data,status=200)
+
+
+# class AnswerAPIView(generics.ListAPIView):
+#     permission_classes = [IsAuthenticated]
+#     serializer_class = Answerserializer
+#     def get_queryset(self):
+#         question_id = self.request.GET.get('question_id')
+#         query_api=  Answer.objects.filter(question__id = question_id)
+#         return query_api
+
+
+class AnswerAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self,request,id):
+        query_api=  Answer.objects.filter(question__id = id)
+        serializer = Answerserializer(query_api)
+        return Response(serializer.data,status=200)
+
+
     
     def create(self):
         user = self.request.user
         data = self.request.data
         question = get_object_or_404(Question,id = data['question'])
-        correct_answer = get_object_or_404(Answer,id = data['correct_answer'])
-        selected_answer = get_object_or_404(Answer,id = data['selected_answer'])
         is_correct = False
         if data['is_correct'] == 'true':
             is_correct = True
@@ -98,6 +115,7 @@ class AnswerAPIView(generics.ListAPIView):
 
         serializer = Ressultserializer(result)
         return Response(serializer.data)
+        
 
 class ProgressAPIView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -127,12 +145,25 @@ class ProgressAPIView(generics.ListAPIView):
 
 
 
-class ResultAPIView(generics.ListAPIView):
+# class ResultAPIView(generics.ListAPIView):
+#     permission_classes = [IsAuthenticated]
+#     serializer_class = Ressultserializer
+#     def get_queryset(self):
+#         user = self.request.user
+#         pk = self.request['pk']
+#         print(pk)
+#         query = Result.objects.filter(user=user,question__category__id = pk)
+#         print(query)
+#         return query
+
+
+class ResultAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = Ressultserializer
-    def get_queryset(self):
-        user = self.request.user
-        cat_id = self.request['cat_id']
-        query = Result.objects.filter(user=user,question__category__id = cat_id)
-        return query
+    def get(self,request,pk):
+        user = request.user
+        print(user)
+        result = Result.objects.filter(user=user,question__category__id = pk)
+        serializer = Ressultserializer(result,many=True)
+        return Response(serializer.data,status=200)
+
         
