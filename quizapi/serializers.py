@@ -41,11 +41,7 @@ class Categoryserializer(serializers.ModelSerializer):
          fields = ('id','title',)
 
 
-class Ressultserializer(serializers.ModelSerializer):
 
-    class Meta:
-        model = Result
-        fields = ('id','is_correct','user','question',)
 
 
 class Progressserializer(serializers.ModelSerializer):
@@ -57,11 +53,10 @@ class Progressserializer(serializers.ModelSerializer):
 
 
 class QuestionSerializer(serializers.ModelSerializer):
-    
     category = Categoryserializer(read_only=True)
     class Meta:
         model = Question
-        fields = '__all__'
+        fields = ('id','question','category',)
 
 
 class Answerserializer(serializers.ModelSerializer):
@@ -70,6 +65,12 @@ class Answerserializer(serializers.ModelSerializer):
         model = Answer
         fields = ('id','question','answer','is_correct',)
 
+class Ressultserializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    question= QuestionSerializer(read_only=True)
+    class Meta:
+        model = Result
+        fields = ('id','is_correct','user','question',)
 
 #     class Meta: user answer question progress result
 #testing api intially

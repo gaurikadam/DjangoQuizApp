@@ -24,6 +24,7 @@ urlpatterns = [
     path('quizapi/', include('rest_framework.urls')),
     path('account/',include('django.contrib.auth.urls')),
     path('quizapi/',include('quizapi.urls')),
+    path('QuizwithApi/',include('QuizwithApi.urls')),
     path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
     
