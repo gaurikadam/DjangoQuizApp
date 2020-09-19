@@ -3,53 +3,67 @@
 <div class="container">
 
 </div>
-<div class ="logindiv" style= "">
+<div id="category-list" style="display: none;">
+<p>category </p>
+</div>
+<div id ="logindiv" style="display: block;" >
     <div class="container">
-        <form action="" id="signupform">
+        <form action="" id="Loginform">
             <div class="form-group">
                 <label for="username">Username</label>
-                <input type="text" class="form-control" id="signup_username">
+                <input type="text" class="form-control" id="username">
             </div>
         
             <div class="form-group">
                 <label for="username">Password</label>
-                <input type="text" class="form-control" id="signup_username">
+                <input type="text" class="form-control" id="password">
             </div>
-            <input id='login_button' type="button" class="btn btn-primary" onclick="login()" value="Submit">
+            <input id='login_main' type="button" class="btn btn-primary" onclick="login()" value="Submit">
           </form>
           <br>
-          <center><button class="btn btn-primary">SignUp</button><center>
+          <div class="text-center">
+
+            <button type="button" style="text-align: center;" onclick="LogintoSignup()" class="btn btn-primary">
+                SignUp
+            </button>
+        </div>
     </div>
 </div>
-<div class ="signupdiv" style="display: none;">
+<div id ="signupdiv" style="display: none;">
     <div class="container">
       <form action="" id="signupform">
         <div class="form-group">
             <label for="username">Username</label>
-            <input type="text" class="form-control" id="signup_username">
+            <input type="text" class="form-control" id="signupusername">
         </div>
     
         <div class="form-group">
             <label for="username">Password</label>
-            <input type="text" class="form-control" id="signup_username">
+            <input type="text" class="form-control" id="signuppassword">
         </div>
         <div class="form-group">
             <label for="username">Retype Password</label>
-            <input type="text" class="form-control" id="signup_username">
+            <input type="text" class="form-control" id="signuppassword2">
         </div>
-        <input id='login_button' type="button" class="btn btn-primary" onclick="login()" value="Submit">
+        <input id='signup_button' type="button" class="btn btn-primary" onclick="signup()" value="Submit">
       </form>
       <br>
-      but
+      <div class="text-center">
+
+        <button type="button" style="text-align: center;" onclick="SignuptoLogin()" class="btn btn-primary">
+            Login
+        </button>
+    </div>
     </div>
 </div>
 <div class ="quizdiv" style="display: none;">
     <div class="container">
-        <form id ="question-form"action=""></form>
+        <form id ="question-form"action="">
         <h3 id="question"></h3>
         <div id="answeroption"></div>
         <br>
         <button class="btn btn-primary">Submit</button>
+      </form>
     </div>
 </div>
 <div class="resultdiv" style="display: none;">
@@ -75,4 +89,141 @@
           </table> 
     </div>
 </div>
+
+<script>
+  
+  function showdiv(id)
+  {
+    
+    var val = document.getElementById(id);
+    val.style.display = "block"
+  }
+  function Hidediv(id)
+  {
+    var val = document.getElementById(id);
+    val.style.display = "none"
+  }
+  function LogintoSignup()
+  {
+Hidediv('logindiv');    
+showdiv('signupdiv');
+  }
+function SignuptoLogin()
+{
+  showdiv('logindiv');    
+ Hidediv('signupdiv');
+}
+function login()
+ {
+  var username = document.getElementById('username').value
+  var password = document.getElementById('password').value
+  console.log(username+password)
+//  var postdata = { username: username, password: password, }
+ fetch("http://127.0.0.1:8000/api/token/", {
+            method: "POST",
+            body: JSON.stringify({
+                username: username,
+                password: password,
+            }),
+            headers: {
+                "Content-type": "application/json; charset=UTF-8"
+            }
+        })
+ .then((response) =>
+ {
+  if (response.ok != true) {
+    alert(response.statusText)
+  }
+  else{
+   return response.json()
+  }
+ })
+ .then((json) => {
+   console.log(json.access)
+   sessionStorage.setItem('Token', json.access)
+   Hidediv('logindiv')
+  getCategory()
+ })
+
+ }
+ function signup()
+ {
+  var username = document.getElementById('signupusername').value
+  var password = document.getElementById('signuppassword').value
+  var password2 = document.getElementById('signuppassword2').value
+  console.log(username+password+"signup")
+//  var postdata = { username: username, password: password, }
+ fetch("http://127.0.0.1:8000/quizapi/register/",
+  {
+            method: "POST",
+            body: JSON.stringify({
+                username: username,
+                password: password,
+                password2: password2,
+            }),
+            headers: {
+                "Content-type": "application/json; charset=UTF-8"
+            }
+        })
+        .then((response) => {
+                return response.json()
+
+            })
+            .then((json) => {
+                if (json.access != null) {
+                    sessionStorage.setItem('Token', json.access)
+                    hideDiv("signUpDiv")
+                    showDiv('logOutDiv')
+                    categoryList()
+                } else {
+                  
+                            alert("incorrect data")
+                  
+                }
+            });
+ 
+
+ }
+ function getCategory()
+ {
+showdiv("category-list")
+var categoryElement = document.getElementById('category-list')
+var url = 'http://127.0.0.1:8000/quizapi/categories/'
+        var token = sessionStorage.getItem('Token')
+        fetch(url, {
+            method: "GET",
+            headers: {
+                "Content-type": "application/json; charset=UTF-8",
+                "Authorization": "Token " + token
+            }
+        })
+        .then((json) => {
+  
+          return json.response
+          console.log(json)
+        })
+        .then(function (data) {
+          category = data
+        for(var i in category)
+        {
+          categoryElement.innerHTML = ''
+          var item = `
+          "<div id="category- ${i}" class=" category-wrapper flex-wrapper">
+            <div style ='flex:7'>
+              <h4 class = 'title'> ${category[i].title} </h4>
+          </div>
+          <div style ='flex:2'>
+              <button class="btn btn-dark attend">Attend </button>
+          </div>
+
+          </div>`
+          categoryElement.innerHTML += item
+        }
+
+
+        })
+
+ }
+</script>
+
 {% endblock %}

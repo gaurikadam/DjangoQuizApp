@@ -17,6 +17,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 from rest_framework.authtoken.models import Token
 from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__) 
 
@@ -27,18 +28,28 @@ class registrationAPIView(APIView):
     permission_classes = []
     def post(self,request):
         serializer = SignUpSerializer(data = request.data)
-        data = {}
-        if serializer.is_valid():
-            user = serializer.save()
-            data['response'] = 'Successfully registered the user'
-            data['username'] = user.username
+        if not serializer.is_valid():
+            return Response(serializer.errors)  
 
-            token = Token.objects.get(user = user).key
-            data['token'] = token
-        else:
-            data = serializer.errors
-        return Response(data)
+        user = serializer.save()
+        refresh = RefreshToken.for_user(user)
+        res = {
+        "refresh": str(refresh),
+        "access": str(refresh.access_token),
+        }
 
+        return Response(res)
+# serializer = UserCreateSerializer(data=request.data)
+#     if not serializer.is_valid():
+#         return response.Response(serializer.errors, status.HTTP_400_BAD_REQUEST)        
+#     user = serializer.save()
+#     refresh = RefreshToken.for_user(user)
+#     res = {
+#         "refresh": str(refresh),
+#         "access": str(refresh.access_token),
+#     }
+#     return response.Response(res, status.HTTP_201_CREATED)
+    
 
 class CategoryAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -78,7 +89,7 @@ class QuestionAPIView(APIView):
                             question=question,
                             is_correct=correctness)
         result.save()
-        serializer = QuestionSerializer(result)
+        serializer = Ressultserializer(result)
         return Response(serializer.data)
 
 
