@@ -3,8 +3,8 @@
 <div class="container">
 
 </div>
-<div id="category-list" style="display: none;">
-<p>category </p>
+<div id="category-list" class= "container">
+
 </div>
 <div id ="logindiv" style="display: block;" >
     <div class="container">
@@ -56,15 +56,15 @@
     </div>
     </div>
 </div>
-<div class ="quizdiv" style="display: none;">
-    <div class="container">
+<div id ="quizdiv" class="container" style="display: none;">
+    <!-- <div class="container"> -->
         <form id ="question-form"action="">
         <h3 id="question"></h3>
         <div id="answeroption"></div>
         <br>
         <button class="btn btn-primary">Submit</button>
       </form>
-    </div>
+    <!-- </div> -->
 </div>
 <div class="resultdiv" style="display: none;">
     <div class="container">
@@ -115,6 +115,7 @@ function SignuptoLogin()
 }
 function login()
  {
+  
   var username = document.getElementById('username').value
   var password = document.getElementById('password').value
   console.log(username+password)
@@ -141,7 +142,7 @@ function login()
  .then((json) => {
    console.log(json.access)
    sessionStorage.setItem('Token', json.access)
-   Hidediv('logindiv')
+
   getCategory()
  })
 
@@ -152,44 +153,36 @@ function login()
   var password = document.getElementById('signuppassword').value
   var password2 = document.getElementById('signuppassword2').value
   console.log(username+password+"signup")
-//  var postdata = { username: username, password: password, }
- fetch("http://127.0.0.1:8000/quizapi/register/",
-  {
+  var postdata = { username: username, password: password, password2: password2, }
+
+        fetch("http://127.0.0.1:8000/quizapi/register/", {
             method: "POST",
-            body: JSON.stringify({
-                username: username,
-                password: password,
-                password2: password2,
-            }),
+            body: JSON.stringify(postdata),
             headers: {
                 "Content-type": "application/json; charset=UTF-8"
             }
         })
-        .then((response) => {
+            .then((response) => {
                 return response.json()
 
             })
             .then((json) => {
-                if (json.access != null) {
-                    sessionStorage.setItem('Token', json.access)
-                    hideDiv("signUpDiv")
-                    showDiv('logOutDiv')
-                    categoryList()
-                } else {
-                  
-                            alert("incorrect data")
-                  
-                }
+               if(json.access == null)
+               {
+                 console.log("invalid")
+               }
             });
  
-
  }
  function getCategory()
  {
-showdiv("category-list")
-var categoryElement = document.getElementById('category-list')
+  Hidediv('logindiv')
+  showdiv('category-list')
+// var categoryDiv = document.getElementById('category-list')
+// console.log(categoryDiv)
 var url = 'http://127.0.0.1:8000/quizapi/categories/'
         var token = sessionStorage.getItem('Token')
+       
         fetch(url, {
             method: "GET",
             headers: {
@@ -197,33 +190,182 @@ var url = 'http://127.0.0.1:8000/quizapi/categories/'
                 "Authorization": "Token " + token
             }
         })
-        .then((json) => {
-  
-          return json.response
-          console.log(json)
-        })
+        .then((response) => {
+            
+             return response.json()
+          })
         .then(function (data) {
-          category = data
-        for(var i in category)
-        {
-          categoryElement.innerHTML = ''
-          var item = `
-          "<div id="category- ${i}" class=" category-wrapper flex-wrapper">
-            <div style ='flex:7'>
-              <h4 class = 'title'> ${category[i].title} </h4>
-          </div>
-          <div style ='flex:2'>
-              <button class="btn btn-dark attend">Attend </button>
-          </div>
-
-          </div>`
-          categoryElement.innerHTML += item
-        }
-
+          // console.log(data)
+          // categoryDiv.innerHTML = ''
+          var categories = data
+        //  var categoryDiv = document.getElementById("category-list").innerHTML 
+        var HTML = ""
+          for(var c in categories)
+          {
+          console.log(categories[c].id)
+           var html = `
+            <div id = "category" class=" category-wrapper flex-wrapper">
+                        <div style ='flex:7'>
+                            <h4 class = 'title'> ${categories[c].title} </h4>
+                        </div>
+                        <div style ='flex:2'>
+                           
+                         
+                          <button class="btn btn-primary" type="button" id="${categories[c].id}" onclick="startquiz(${categories[c].id})">Start</button>
+                        </div>
+              </div>
+                    `
+            HTML = HTML + html
+          }
+          
+          document.getElementById("category-list").innerHTML = HTML
 
         })
 
  }
+ function startquiz(Item)
+ {
+   Hidediv('logindiv')
+   Hidediv('category-list')
+   showdiv('quizdiv')
+   var token = sessionStorage.getItem('Token')
+        var questionDiv = document.getElementById('question').innerHTML 
+        url_1 = "http://127.0.0.1:8000/quizapi/question/"
+        url_2 = Item+ "/"
+        url = url_1+url_2
+        // console.log(url)
+        // selectedAnswer = ''
+        // correctAnswer = ''
+
+        fetch(url, {
+            method: "GET",
+            headers: {
+                "Content-type": "application/json; charset=UTF-8",
+                "Authorization": "JWT " + token
+            }
+        })
+        .then((response) => {
+                
+                    return response.json()
+
+            })
+        .then(function (data) {
+          if(data == null)
+          {
+            alert("all questions in the category are completed")
+            getCategory()
+          }
+          else{
+           var questions = data;
+            // question = question_str.question
+            console.log(data[0].question)
+            var html = data[0].question
+            // questionDiv = questionDiv + html
+            document.getElementById('question').innerHTML = "Q. "+ html
+            getOptions(data[0].id)
+
+          }
+        })
+ }
+ function getOptions(questionid)
+ {
+  var token = sessionStorage.getItem('Token')
+  url_1 = "http://127.0.0.1:8000/quizapi/ans/"
+  url_2 = questionid +"/"
+  url = url_1 + url_2
+  console.log(url)
+  var correct_answer =""
+  var selected_answer=""
+  fetch(url, {
+            method: "GET",
+            headers: {
+                "Content-type": "application/json; charset=UTF-8",
+                "Authorization": "Token " + token
+            }
+        })
+        .then((response) => {
+                
+                    return response.json()
+
+            })
+         .then(function (data) {
+          var options = data
+          var HTML = ""
+          for(var o in options)
+          {
+            var html = 
+            `<div class="form-check">
+          
+          <input class="form-check-input answer-options" type="radio" name="questionbtn" id="ansid" value="${options[o].id}"  required>
+          <label class="form-check-label" for="{{a.id}}">
+            ${options[o].answer}
+          </label>
+        </div> `
+        if(options[o].is_correct == true)
+        {
+          correct_answer = options[o].id
+        }
+        // console.log(correct_answer)
+        HTML = HTML + html
+        
+          }
+          document.getElementById("answeroption").innerHTML = HTML
+        
+          
+          for (var i in options) {
+                    var optionsBtn = document.getElementsByClassName('answer-options')[i]
+
+                    optionsBtn.addEventListener('click', (function (item) {
+                        return function () {
+                            selected_answer = item
+                            // console.log(selected_answer)
+                        }
+                    })(options[i]))
+                }
+        })
+        var updateAnwer = document.getElementById('question-form')
+        updateAnwer.addEventListener('submit', function (e) {
+          e.preventDefault()
+          var token = sessionStorage.getItem('Token')
+          console.log(token)
+          url_1 = "http://127.0.0.1:8000/quizapi/question/"
+          url_2 = questionid + "/"
+          url = url_1+ url_2
+          console.log(correct_answer)
+          console.log(selected_answer.id)
+          var is_correct = false
+          if(correct_answer == selected_answer.id)
+          {
+            // console.log("true")
+            is_correct = true
+          }
+          // else
+          // {
+          //   console.log("incorrect")
+          // }
+          fetch(url,{
+            method: "POST",
+            headers: {
+                "Content-type": "application/json;",
+                "Authorization": "Token" + token
+            },
+            body: JSON.stringify({
+                "question": questionid,
+                "is_correct": is_correct,
+            })
+        })
+        .then((response) => {
+          response.json()
+        })
+        .then(function (data) {
+          console.log(data)
+        })
+
+        })
+
+
+ }
+
 </script>
 
 {% endblock %}
