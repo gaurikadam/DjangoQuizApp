@@ -9,7 +9,7 @@ from rest_framework import mixins
 import logging
 from rest_framework import serializers
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,AllowAny
 from quizapi.serializers import SignUpSerializer,QuestionSerializer,Categoryserializer,QuestionSerializer,Answerserializer,Progressserializer,Ressultserializer,UserSerializer
 from rest_framework import permissions
 from django.http import HttpResponse, JsonResponse
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 # #With APIView
 
 class registrationAPIView(APIView):
-    permission_classes = []
+    permission_classes = [AllowAny]
     def post(self,request):
         serializer = SignUpSerializer(data = request.data)
         if not serializer.is_valid():

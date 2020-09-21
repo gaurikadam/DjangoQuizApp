@@ -66,7 +66,7 @@
       </form>
     <!-- </div> -->
 </div>
-<div id="resultdiv" style="display: none;">
+<div class="resultdiv" style="display: none;">
     <div class="container">
         <h3>Results</h3>
         <table class="table">
@@ -77,19 +77,17 @@
                 <th scope="col">Result</th>
               </tr>
             </thead>
-            <tbody id ="resultbody">
-             
+            <tbody>
+                
+              <tr>
+                <th scope="row"></th>
+                <td class="" id="resultcell"></td>
+              </tr>
               
     
             </tbody>
           </table> 
     </div>
-    <div class="text-center">
-
-      <button type="button" style="text-align: center;" onclick="SignuptoLogin()" class="btn btn-primary">
-          View Categories
-      </button>
-  </div>
 </div>
 
 <script>
@@ -247,7 +245,7 @@ var url = 'http://127.0.0.1:8000/quizapi/categories/'
         // console.log(url)
         // selectedAnswer = ''
         // correctAnswer = ''
-        var temp 
+
         fetch(url, {
             method: "GET",
             headers: {
@@ -257,24 +255,17 @@ var url = 'http://127.0.0.1:8000/quizapi/categories/'
             }
         })
         .then((response) => {
-
-          if (response.ok != true) {
-                    // alert(response.statusText)
-                    // showDiv('logInDiv')
-                    return null
-                }
-                else {
+                
                     return response.json()
-                }
 
             })
         .then(function (data) {
-          if(data.length == 0){
-                         displayResult(Item)
-          }
-          if(data.length > 0)
+          if(data == null)
           {
-          
+            alert("all questions in the category are completed")
+            getCategory()
+          }
+          else{
            var questions = data;
             // question = question_str.question
             console.log(data[0].question)
@@ -353,12 +344,10 @@ var url = 'http://127.0.0.1:8000/quizapi/categories/'
           console.log(correct_answer)
           console.log(selected_answer.id)
           var is_correct = false
-          var marks = 0
           if(correct_answer == selected_answer.id)
           {
             // console.log("true")
             is_correct = true
-            marks = 1
           }
           // else
           // {
@@ -379,81 +368,14 @@ var url = 'http://127.0.0.1:8000/quizapi/categories/'
          return response.json()
         })
         .then(function (data) {
-          console.log(data)
-          updateprogress(data,marks)
+          
         })
 
         })
 
 
- }
- function updateprogress(data,marks)
- {
-   category = data.question.category.id
-   var url = `http://127.0.0.1:8000/quizapi/progress/`
-        var token = sessionStorage.getItem('Token')
-        fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-type": "application/json; charset=UTF-8",
-                "Authorization": 'Bearer ' + token 
-            },
-            body: JSON.stringify({
-                "category": category,
-                "marks": marks,
-            })
-        })
-            .then((response) => {
-                return response.json()
-            })
-            .then(function (data) {
-                console.log(data)
-            })
-    startquiz(category)
- }
- function displayResult(category)
- {
-   Hidediv('quizdiv')
-   showdiv('resultdiv')
-   console.log(category)
-   var token = sessionStorage.getItem('Token')
-
-var url_1 = 'http://127.0.0.1:8000/quizapi/result/'
-var url_2 = category+'/'
-url = url_1 + url_2
-        var token = sessionStorage.getItem('Token')
-      
-        fetch(url, {
-            method: "GET",
-            headers: {
-                "Content-type": "application/json; charset=UTF-8",
-                // "Authorization": "Token " + token
-                "Authorization": 'Bearer ' + token 
-            }
-        })
-        .then((response) => {
-            
-             return response.json()
-          })
-        .then(function (data) {
-          var categories = data        
-         console.log(data)
-         results = data
-         var HTML = ""
-         for(var r in results)
-         {
-           var html = `<tr>
-                      <th scope="row">${r.question}</th>
-                      <td scope="row">${r.is_correct}</td>
-                      </tr>`
-                      HTML = HTML + html
-         }
-         document.getElementById("resultbody").innerHTML = HTML
-        })
-       
  }
 
 </script>
 
 {% endblock %}
-
